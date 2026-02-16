@@ -3444,6 +3444,23 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                             } else {
                                 dataInfoPacket.type = protocol < ProtocolInfo.v1_13_0 ? 1 : ResourcePackDataInfoPacket.TYPE_RESOURCE;
                             }
+                            // Debug: log DataInfo packet details
+                            StringBuilder hashHex = new StringBuilder();
+                            if (dataInfoPacket.sha256 != null) {
+                                for (byte b : dataInfoPacket.sha256) {
+                                    hashHex.append(String.format("%02x", b));
+                                }
+                            }
+                            this.server.getLogger().info(
+                                "[PackDebug] DataInfo: packId=" + dataInfoPacket.packId
+                                + " packVer=null"
+                                + " maxChunkSize=" + dataInfoPacket.maxChunkSize
+                                + " chunkCount=" + dataInfoPacket.chunkCount
+                                + " compressedSize=" + dataInfoPacket.compressedPackSize
+                                + " hashLen=" + (dataInfoPacket.sha256 != null ? dataInfoPacket.sha256.length : 0)
+                                + " hash=" + hashHex
+                                + " premium=" + dataInfoPacket.premium
+                                + " type=" + dataInfoPacket.type);
                             this.dataPacket(dataInfoPacket);
                         }
                         break;
