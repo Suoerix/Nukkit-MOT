@@ -2999,6 +2999,26 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             infoPacket.hasAddonPacks = true;
         }
         infoPacket.mustAccept = this.server.getForceResources();
+        // Debug: dump raw serialized bytes of the InfoPacket for binary comparison
+        try {
+            infoPacket.protocol = this.protocol;
+            infoPacket.encode();
+            byte[] encodedBytes = infoPacket.getBuffer();
+            // Skip packet ID VarInt header (1 byte for packet ID 6)
+            // to get pure payload, comparable with WaterdogPE's tryEncode output
+            int headerLen = 1; // VarInt for packet ID 6 = 1 byte
+            int payloadLen = encodedBytes.length - headerLen;
+            int dumpLen = Math.min(payloadLen, 300);
+            StringBuilder hex = new StringBuilder();
+            for (int i = 0; i < dumpLen; i++) {
+                hex.append(String.format("%02x ", encodedBytes[i + headerLen]));
+                if ((i + 1) % 32 == 0) hex.append("\n");
+            }
+            this.server.getLogger().info("[PackDebug] MOT InfoPacket payload bytes (" + payloadLen + " total, header=" + headerLen + "):\n" + hex);
+            infoPacket.reset();
+        } catch (Exception e) {
+            this.server.getLogger().info("[PackDebug] Failed to dump MOT InfoPacket bytes: " + e.toString());
+        }
         this.dataPacket(infoPacket);
     }
 
